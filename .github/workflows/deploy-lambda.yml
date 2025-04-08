@@ -22,7 +22,7 @@ jobs:
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt -t package
-          cp main.py package/
+          cp -r app package/app
 
       - name: Zip Lambda Package
         run: |
