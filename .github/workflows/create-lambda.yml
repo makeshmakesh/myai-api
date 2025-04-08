@@ -7,6 +7,11 @@ jobs:
   create-lambda:
     runs-on: ubuntu-latest
 
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1  # Change region if needed
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -18,8 +23,6 @@ jobs:
 
       - name: Install Dependencies and Package Code
         run: |
-          python -m venv venv
-          source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt -t package
           cp -r app package/app
@@ -29,20 +32,13 @@ jobs:
           cd package
           zip -r ../lambda_function.zip .
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Change as needed
-
       - name: Create Lambda Function
         run: |
           aws lambda create-function \
             --function-name myai-api \
             --runtime python3.10 \
             --role arn:aws:iam::061051221530:role/AWSlambda \
-            --handler main.handler \
+            --handler app.main.handler \
             --zip-file fileb://lambda_function.zip \
             --timeout 30 \
             --memory-size 256
