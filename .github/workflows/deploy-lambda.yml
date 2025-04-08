@@ -1,8 +1,7 @@
 name: Deploy FastAPI to AWS Lambda
 
 on:
-  push:
-    branches: [main]  # Trigger on main branch push
+  workflow_dispatch:  # Manual trigger from GitHub Actions tab
 
 jobs:
   deploy:
