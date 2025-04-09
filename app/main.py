@@ -29,11 +29,11 @@ def get_assistant(assistant_name, pinecone_api_key):
         print("Error", error)
         return None
 
-@app.get("/")
+@app.get("/documents")
 def read_root():
     return {"message": "Welcome to the myai-api"}
 
-@app.post("/upload")
+@app.post("/documents/upload")
 async def upload_file(apikey: str = Form(...),
     username: str = Form(...), file: UploadFile = File(...)):
     try:
