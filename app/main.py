@@ -34,7 +34,7 @@ def get_assistant(assistant_name, pinecone_api_key):
 def read_root():
     return {"message": "Welcome to the myai-api"}
 
-@app.post("/documents")
+@app.post("/documents/assitant-file")
 async def upload_file(
     apikey: str = Form(...),
     username: str = Form(...),
@@ -57,7 +57,7 @@ async def upload_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
-@app.delete("/documents")
+@app.delete("/documents/assitant-file")
 async def delete_file(
     apikey: str = Form(...),
     username: str = Form(...),
