@@ -1,4 +1,5 @@
 
+#pylint:disable=all
 from fastapi import FastAPI, File, UploadFile, HTTPException,Form
 from sqlalchemy.orm import Session
 from mangum import Mangum
@@ -33,25 +34,47 @@ def get_assistant(assistant_name, pinecone_api_key):
 def read_root():
     return {"message": "Welcome to the myai-api"}
 
-@app.post("/documents/upload")
-async def upload_file(apikey: str = Form(...),
-    username: str = Form(...), file: UploadFile = File(...)):
+@app.post("/documents")
+async def upload_file(
+    apikey: str = Form(...),
+    username: str = Form(...),
+    file: UploadFile = File(...)
+):
     try:
         save_path = f"/tmp/{file.filename}"
         with open(save_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # You can now process it as needed (e.g., read content, upload to Pinecone, etc.)
         print(f"Received file: {file.filename}")
         pinecone_assistant = get_assistant(assistant_name=username, pinecone_api_key=apikey)
         
         if pinecone_assistant is None:
-            return JSONResponse(content={"message": "Pinecone assistant not found , please check apikey", "apikey": apikey})
+            return JSONResponse(content={"message": "Pinecone assistant not found, please check apikey", "apikey": apikey})
+        
         response = pinecone_assistant.upload_file(file_path=save_path, timeout=None)
-        return JSONResponse(content={"message": "File received successfully", "filename": file.filename})
+        return JSONResponse(content={"message": "File uploaded successfully", "filename": file.filename})
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+
+@app.delete("/documents")
+async def delete_file(
+    apikey: str = Form(...),
+    username: str = Form(...),
+    file_id: str = Form(...)
+):
+    try:
+        pinecone_assistant = get_assistant(assistant_name=username, pinecone_api_key=apikey)
+        
+        if pinecone_assistant is None:
+            return JSONResponse(content={"message": "Pinecone assistant not found, please check apikey", "apikey": apikey})
+        
+        pinecone_assistant.delete_file(file_id=file_id)
+        return JSONResponse(content={"message": "File deleted successfully", "file_id": file_id})
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Delete failed: {str(e)}")
+
 
 
 
